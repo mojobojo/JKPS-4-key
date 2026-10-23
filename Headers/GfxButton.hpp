@@ -87,7 +87,7 @@ class GfxButton : public sf::Drawable, public sf::Transformable
                 void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
                 void setPosition(sf::Vector2f position);
-                void create(float deltaSeconds, sf::Vector2f buttonSize);
+                void create(float deltaSeconds, sf::Vector2f buttonSize, bool isSimultaneousAlternating, bool isOutOfOrder);
 
                 void scaleTexture(sf::Vector2f buttonSize);
 
@@ -109,6 +109,8 @@ class GfxButton : public sf::Drawable, public sf::Transformable
                 sf::VertexArray mBottomVertecies;
                 std::vector<size_t> mAvailableRectIndices;
                 std::vector<size_t> mUsedRectIndices;
+                std::vector<bool> mIsSimultaneous;
+                std::vector<bool> mIsOutOfOrder;
                 std::vector<sf::Text> mTexts;
                 sf::Vector2f mEmitterPosition;
                 sf::Vector2f mLastRectSize;

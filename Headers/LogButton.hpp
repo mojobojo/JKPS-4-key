@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <array>
+#include <vector>
 
 
 class LogButton
@@ -15,6 +16,9 @@ class LogButton
 
         static void moveIndex();
         bool isButtonPressed() const;
+        static const std::vector<unsigned>& getPressedIndices() { return sPressedIndices; }
+        static bool isOutOfOrder(unsigned idx) { return sOutOfOrder[idx] != 0; }
+        static void setNumKeys(size_t num);
 
 		void accumulateBeatsPerMinute();
         void reset();
@@ -52,5 +56,11 @@ class LogButton
         std::array<float, 7lu> mPrevKpsBuffer;
         static unsigned mBufferIndex;
         static unsigned mPrevKpsBufferIndex;
+
+        static std::vector<unsigned> sPressedIndices;
+        static unsigned sExpectedIndex;
+        static std::vector<char> sOutOfOrder;
+        static size_t sNumKeys;
+        static bool sResetNext;
     
 };

@@ -89,4 +89,6 @@ class Application
         std::unique_ptr<Background> mBackground;
         std::unique_ptr<KPSWindow> mKPSWindow;
         std::unique_ptr<KeysPerSecondGraph> mGraph;
+
+        size_t mKeyCount;
 };

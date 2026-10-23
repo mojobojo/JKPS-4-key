@@ -4,6 +4,7 @@
 #include "../Headers/Button.hpp"
 #include "../Headers/Application.hpp"
 #include "../Headers/Utility.hpp"
+#include "../Headers/LogButton.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -58,7 +59,19 @@ void GfxButton::update(float deltaSeconds, bool keyState)
         {
             const auto &buttonSprite = *mSprites[ButtonSprite];
             const auto rect = buttonSprite.getGlobalBounds();
-            mEmitter.create(deltaSeconds, { rect.width, rect.height });
+            // Check if simultaneous alternating
+            const auto& pressed = LogButton::getPressedIndices();
+            bool isSimultaneousAlternating = false;
+            if (pressed.size() > 1) {
+                for (auto other : pressed) {
+                    if (other != mBtnIdx && std::abs((int)other - (int)mBtnIdx) == 2) {
+                        isSimultaneousAlternating = true;
+                        break;
+                    }
+                }
+            }
+            bool isOutOfOrder = LogButton::isOutOfOrder(mBtnIdx);
+            mEmitter.create(deltaSeconds, { rect.width, rect.height }, isSimultaneousAlternating, isOutOfOrder);
         }
     }
 
@@ -391,6 +404,8 @@ GfxButton::RectEmitter::RectEmitter(unsigned btnIdx)
     const auto count = mMiddleVertecies.getVertexCount() / 4;
     for (auto i = 0ul; i < count; ++i)
         mAvailableRectIndices.emplace_back(i);
+    mIsSimultaneous.resize(count, false);
+    mIsOutOfOrder.resize(count, false);
 }
 
 void GfxButton::RectEmitter::update(float deltaSeconds, bool keyState, bool prevKeyState)
@@ -462,12 +477,15 @@ void GfxButton::RectEmitter::update(float deltaSeconds, bool keyState, bool prev
     }
 
     // Iterate through all the indices of the rectangles to remove
+    std::sort(toRemove.rbegin(), toRemove.rend());
     for (auto i : toRemove)
     {
         // Remove every index that is equal to i
         mUsedRectIndices.erase(std::remove(
                 mUsedRectIndices.begin(), mUsedRectIndices.end(), i), 
             mUsedRectIndices.end());
+        mIsSimultaneous[i] = false;
+        mIsOutOfOrder[i] = false;
     }
 
     // If a button is pressed don't let the spawning rectangle go away from the spawn point
@@ -546,7 +564,7 @@ float GfxButton::RectEmitter::getConstantSpeedScale()
 	return 60.f;
 }
 
-void GfxButton::RectEmitter::create(float deltaSeconds, sf::Vector2f buttonSize)
+void GfxButton::RectEmitter::create(float deltaSeconds, sf::Vector2f buttonSize, bool isSimultaneousAlternating, bool isOutOfOrder)
 {
     const auto isInSupportedRange = mBtnIdx < Settings::SupportedAdvancedKeysNumber;
     const auto advMode = isInSupportedRange && Settings::KeyPressVisAdvSettingsMode;
@@ -615,6 +633,8 @@ void GfxButton::RectEmitter::create(float deltaSeconds, sf::Vector2f buttonSize)
     // and push it to the used one
     mAvailableRectIndices.pop_back();
     mUsedRectIndices.emplace_back(rectIndex);
+    mIsSimultaneous[rectIndex] = isSimultaneousAlternating;
+    mIsOutOfOrder[rectIndex] = isOutOfOrder;
 }
 
 void GfxButton::RectEmitter::scaleTexture(sf::Vector2f buttonSize)
@@ -656,6 +676,15 @@ sf::Color GfxButton::RectEmitter::getVertexColor(const sf::VertexArray &vertexAr
     auto color = !advMode ? Settings::KeyPressVisColor : 
         Settings::KeyPressVisAdvColor[mBtnIdx];
 
-    color.a -= color.a * getVertexProgress(vertexIndex, vertexArray[vertexIndex].position.y);
+    size_t rectIndex = vertexIndex / 4;
+    if (Settings::ShowKeyLock && rectIndex < mIsSimultaneous.size() && mIsSimultaneous[rectIndex]) {
+        color = sf::Color::Red;
+        // Simultaneous bars don't fade
+    } else if (Settings::ShowOrderErrors && rectIndex < mIsOutOfOrder.size() && mIsOutOfOrder[rectIndex]) {
+        color = sf::Color::Blue;
+        // Out of order bars don't fade
+    } else {
+        color.a -= color.a * getVertexProgress(vertexIndex, vertexArray[vertexIndex].position.y);
+    }
     return color;
 }

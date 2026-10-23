@@ -4,13 +4,22 @@
 #include <cassert>
 #include <iostream>
 
-
-unsigned LogButton::mBufferIndex(0);
-unsigned LogButton::mPrevKpsBufferIndex(0);
-float LogButton::statKeysPerSecond(0);
 float LogButton::statMaxKeysPerSecond(0);
 unsigned LogButton::statTotal(0);
 float LogButton::statBeatsPerMinute(0);
+float LogButton::statKeysPerSecond(0);
+unsigned LogButton::mBufferIndex(0);
+unsigned LogButton::mPrevKpsBufferIndex(0);
+size_t LogButton::sNumKeys = 4;
+std::vector<char> LogButton::sOutOfOrder(4, 0);
+unsigned LogButton::sExpectedIndex = 0;
+std::vector<unsigned> LogButton::sPressedIndices;
+bool LogButton::sResetNext = false;
+
+void LogButton::setNumKeys(size_t num) { 
+    sNumKeys = num; 
+    sOutOfOrder.assign(num, 0);
+}
 
 LogButton::LogButton(const unsigned idx, LogKey &key)
 : mState(false)
@@ -30,9 +39,32 @@ LogButton::LogButton(const unsigned idx, LogKey &key)
 
 void LogButton::processRealtimeInput()
 {
+    if (sResetNext) {
+        sExpectedIndex = 0;
+        sOutOfOrder.assign(sNumKeys, 0);
+        sResetNext = false;
+        std::cout << "Reset to 0" << std::endl;
+    }
+
     auto &bufferElem = mBuffer[mBufferIndex];
     const auto prevState = mState;
     mState = mKey.isPressed();
+
+    if (!prevState && mState)
+    {
+        //std::cout << "Pressed " << mBtnIdx << ", expected " << sExpectedIndex << ", out of order: " << (mBtnIdx != sExpectedIndex) << std::endl;
+        if (mBtnIdx != sExpectedIndex) {
+            sOutOfOrder[mBtnIdx] = 1;
+        } else {
+            sOutOfOrder[mBtnIdx] = 0;
+            sExpectedIndex = (sExpectedIndex + 1) % sNumKeys;
+        }
+        sPressedIndices.push_back(mBtnIdx);
+    }
+    if (prevState && !mState)
+    {
+        sPressedIndices.erase(std::remove(sPressedIndices.begin(), sPressedIndices.end(), mBtnIdx), sPressedIndices.end());
+    }
 
     if (bufferElem > 0u)
     {

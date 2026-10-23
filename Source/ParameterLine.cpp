@@ -1424,6 +1424,8 @@ ParameterLine::ID ParameterLine::parIdToParLineId(LogicalParameter::ID id)
         case LogicalParameter::ID::OtherSaveStats: return ParameterLine::ID::OtherSaveStats;
         case LogicalParameter::ID::OtherShowOppOnAlt: return ParameterLine::ID::OtherShowOppOnAlt;
         case LogicalParameter::ID::OtherMultpl: return ParameterLine::ID::OtherMultpl;
+        case LogicalParameter::ID::OtherShowKeyLock: return ParameterLine::ID::OtherShowKeyLock;
+        case LogicalParameter::ID::OtherShowOrderErrors: return ParameterLine::ID::OtherShowOrderErrors;
 
         case LogicalParameter::ID::SaveStatMaxKPS: return ParameterLine::ID::SaveStatMaxKPS;
         case LogicalParameter::ID::SaveStatTotal: return ParameterLine::ID::SaveStatTotal;

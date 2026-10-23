@@ -591,6 +591,8 @@ struct LogicalParameter
             OtherSaveStats,
             OtherShowOppOnAlt,
             OtherMultpl,
+            OtherShowKeyLock,
+            OtherShowOrderErrors,
 
             SaveStatMaxKPS,
             SaveStatTotal,

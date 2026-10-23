@@ -433,6 +433,10 @@ void Application::buildButtons()
         addButton(logKeyQueue.front());
         logKeyQueue.pop();
     }
+
+    mKeyCount = mButtons.size();
+    
+    LogButton::setNumKeys(mKeyCount);
     
     // TODO remove *new LogKey, use smart ptrs instead
     if (mButtons.empty())

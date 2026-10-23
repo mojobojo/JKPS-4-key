@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
+set(SFML_DIR "/home/mojobojo/dev/SFML-2.5.1/build")
 
 project(JKPS CXX)
 
