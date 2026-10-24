@@ -57,6 +57,7 @@ Click with **right mouse button** on the button to edit it
 - Capture the program as a game in OBS, not as a window.
 - To make the program work with greenscreen write **"GreenscreenBG.png"** in **"Main window" -> "Background texture filepath"** and press Enter or Refresh button.
 - If the program lags only in OBS then close its menu.
+- In the menu, under **Other**, you can toggle **Show Key Lock** and **Show Order Errors** to highlight simultaneous key-lock issues and out-of-order presses.
 - For Linux users: [**SFML 2.5.1**](https://www.sfml-dev.org/) must be installed.
 
 # [Themes](Wiki/Themes.md)
